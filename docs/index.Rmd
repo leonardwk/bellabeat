@@ -1,6 +1,11 @@
 ---
 title: "Bellabeat Case Study"
-output: html_document
+output:
+  html_document:
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: true
 ---
 # Case Study 2: Bellabeat Data Analysis
 
