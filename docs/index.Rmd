@@ -78,7 +78,7 @@ if(!require(lubridate)) install.packages("lubridate")
 if(!require(ggplot2)) install.packages("ggplot2")
 if(!require(skimr)) install.packages("skimr")
 ```
-
+  
 In addition, we must load these packages using the `library()` function.
 
 ```{r}
@@ -90,7 +90,7 @@ library("lubridate")
 library("ggplot2")
 library("skimr")
 ```
-
+  
 We can now import and prepare the data for cleaning. The given data files are separated into two one-month logs of data, split into eleven files each. The file sizes vary widely, from 4 KB to over 87,000 KB. The larger data sets are comprised of mostly minute-based data, with the smallest being 3,200 KB. Although the level of specificity can be useful, it will likely not have a significant effect on the results of this case study. Therefore, it would be wise to avoid importing these data files.
 
 With the minute-based files out of the picture, we can assign each CSV file to its own data frame as shown here:
@@ -107,7 +107,7 @@ daily_calories <- read_csv("dailyCalories_merged.csv")
 daily_sleep <- read_csv("sleepDay_merged.csv")
 weight_log <- read_csv("weightLogInfo_merged.csv")
 ```
-
+  
 ## Process
 
 ### Inspecting our Data
@@ -126,7 +126,7 @@ head(daily_calories)
 head(daily_sleep)
 head(weight_log)
 ```
-
+  
 ### Column Names
 
 Next, let's see how the columns are organized using `col()`:
@@ -143,6 +143,7 @@ colnames(daily_calories)
 colnames(daily_sleep)
 colnames(weight_log)
 ```
+  
 ### Observations
 
 From the first few rows of each data set as well as the column names, we can make a few observations:
@@ -252,7 +253,7 @@ weight_log <- weight_log %>%
     log_id = LogId
   )
 ```
-
+  
 Now that the column and date names have all been standardized, we need to ensure consistency between all of the different date variables. As previously mentioned, this requires separating the `date` of each row from the `time` into two distinct columns:
 
 ```{r}
@@ -298,7 +299,7 @@ weight_log <- weight_log %>%
     time, .after = date
   )
 ```
-
+  
 Time to standardize the 'date' format:
 ```{r}
 daily_activity <- daily_activity  %>%
@@ -318,7 +319,7 @@ daily_calories <- daily_calories %>%
     date = as.Date(date, format = "%m/%d/%Y")
   )
 ```
-
+  
 Next, let's get rid of duplicates:
 
 ```{r}
@@ -342,7 +343,7 @@ daily_sleep <- daily_sleep %>%
 weight_log <- weight_log %>% 
   distinct()
 ```
-
+  
 We can validate that there are no duplicates:
 
 ```{r}
@@ -357,7 +358,7 @@ cat("daily_calories:", sum(duplicated(daily_calories)), "duplicates\n")
 cat("daily_sleep:", sum(duplicated(daily_sleep)), "duplicates\n")
 cat("weight_log:", sum(duplicated(weight_log)), "duplicates\n")
 ```
-
+  
 ## Analyze
 
 ### Unique Participants
@@ -376,6 +377,7 @@ cat("daily_calories:", n_distinct(daily_calories$id), "unique participants\n")
 cat("daily_sleep:", n_distinct(daily_sleep$id), "unique participants\n")
 cat("weight_log:", n_distinct(weight_log$id), "unique participants\n")
 ```
+  
 Almost all of the data sets have the same amount of distinct participants, however, `daily_sleep` and `weight_log` have significantly less. In particular, `weight_log` only features 8 participants. As a result, we should avoid analyzing this data set as the sample size is too small and even one outlier could skew analysis heavily.
 
 ### Summary Statistics
@@ -444,6 +446,7 @@ weight_log %>%
   ) %>% 
   summary()
 ```
+  
 We can make a few observations based on these summary statistics about this sample group:
 
 * The median sleep time is **7.21 hours**, which is more than the [CDC's recommended amount of sleep for adults](https://www.cdc.gov/sleep/data-research/facts-stats/adults-sleep-facts-and-stats.html#:~:text=The%20recommended%20amount%20of%20sleep,Getting%20insufficient%20sleep.).
@@ -468,6 +471,7 @@ daily_activity %>%
   xlab("Total Steps") +
   ylab("Calories Burned")
 ```
+  
 As expected, the graph illustrates that there is a clear correllation between calories burned and total steps on a day-to-day basis. 
 
 However, is this the same with different levels of activity? Let's compare the time spent on each level of activity with the daily calories.
@@ -484,6 +488,7 @@ daily_activity %>%
   xlab("Sedentary Minutes") +
   ylab("Calories Burned")
 ```
+  
 Unsurprisingly, `sedentary_minutes` does not seem to significantly increase the total calories burned, as it includes time spent sleeping. However, the downwards trend near the end of the graph demonstrates that as it takes up more of a person's day, `sedentary_minutes` can take away from time spent on strenous activity, reducing the amount of calories burned.
 
 Next, let's inspect `lightly_active_minutes` vs. `calories`:
@@ -498,6 +503,7 @@ daily_activity %>%
   xlab("Lightly Active Minutes") +
   ylab("Calories Burned")
 ```
+  
 Similar to the `sedentary_minutes` vs `calories` graph, `lightly_active_minutes` does not seem to have a significant positive increase on daily calories burned. However, unlike sedentary activity, light physical activity does seem to not hamper total calories burned.
 
 Next, we can visualize the effect `fairly_active_minutes` has on `calories`:
@@ -512,6 +518,7 @@ daily_activity %>%
   xlab("Fairly Active Minutes") +
   ylab("Calories Burned")
 ```
+  
 The trend line at the beginning section of the graph, where the majority of data points are located, indicates that fairly active physical activity can have some impact on total daily calories, however, it seems more limited in its effect. Nonetheless, it appears to have a marginally higher impact than lightly active physical activity.
 
 Finally, let's visualize how `very_active_minutes` effects `calories`:
@@ -526,6 +533,7 @@ daily_activity %>%
   xlab("Very Active Minutes") +
   ylab("Calories Burned")
 ```
+  
 From this graph, we can see that `very_active_minutes` has a significant impact on `calories`. The consequences of very active activity is substantially higher than all other forms of physical activity, reflected in the trend line. 
 
 ### Trends on each Day of the Week
@@ -602,7 +610,7 @@ weight_log <- weight_log %>%
     day_of_week, .after = date
   )
 ```
-
+  
 Then we can visualize activity levels vs. `day_of_week`:
 
 ```{r}
@@ -629,6 +637,7 @@ daily_activity %>%
   theme(axis.text.x = element_text(angle=45, vjust=1, hjust=1))
 
 ```
+  
 We can see that `very_active_minutes` actually drops on Friday, Saturday, and Sunday, where people usually have more free time. This could be due to a priority on spending time outside of high physical activity, focusing on social activities instead. With that said, the actual difference in time spent on very active activity is not significant enough to create a noticeable trend.
 
 Next, let's look at calories burned on each day of the week:
@@ -652,6 +661,7 @@ daily_activity %>%
   ) +
   theme(axis.text.x = element_text(angle=45, vjust=1, hjust=1))
 ```
+  
 Similar to `very_active_minutes`, there doesn't seem to be a significant difference in the amount of calories burned relative to the `day_of_week`.
 
 ### Displaying Sleep Activity  
@@ -673,6 +683,7 @@ daily_activity_sleep_merged %>%
   xlab("Total Minutes Asleep") +
   ylab("Calories Burned")
 ```
+  
 As we can see, there is not a clear correlation on total minutes asleep and calories burned on a daily basis. This does not indicate that sleep is not important to a person's health though, merely that calories burned are not directly affected.
 
 Let's check how sleep varies on weekdays in comparison to weekends:
@@ -700,6 +711,7 @@ daily_activity_sleep_merged %>%
   ) +
   theme(axis.text.x = element_text(angle=45, vjust=1, hjust=1))
 ```
+  
 Although there is not a significant amount of variation between each day of the week, weekends, and Sunday in particular, seems to have a higher amount of minutes asleep. So it may be better for users to keep an eye out on how much they sleep on weekdays, especially Friday.
 
 ## Share
@@ -715,6 +727,7 @@ hourly_calories_intensities <- full_join(hourly_calories, hourly_intensities, by
 hourly_activity <- full_join(hourly_calories_intensities, hourly_steps, by = c("id", "date", "day_of_week", "time"))
 head(hourly_activity)
 ```
+  
 Then, we can see what time users are being very active:
 ```{r}
 hourly_activity %>% 
@@ -726,6 +739,7 @@ hourly_activity %>%
   ylab("Intensity Count") +
   theme(axis.text.x = element_text(angle=50, vjust=1, hjust=1))
 ```
+  
 From the chart, it seems that around 8:00 AM, users start to be more active, peaking from 5:00 PM to 7:00 PM. It is likely that around this time, users are going to the gym, enduring more active physical activity in comparison to the work day.
 
 Additionally, we can display when users are burning calories throughout the day:
@@ -739,6 +753,7 @@ hourly_activity %>%
   ylab("Calorie Count") +
   theme(axis.text.x = element_text(angle=50, vjust=1, hjust=1))
 ```
+  
 Similar to the previous chart depicting user intensity by hour, the calories burned seem to peak around 5:00 PM to 7:00 PM. However, there is significant calorie usage early in the day, especially starting from 8:00 AM. 
 
 ## Act
